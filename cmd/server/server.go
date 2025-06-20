@@ -1,19 +1,34 @@
 package main
 
 import (
-	"gomuncool/internal/handlers"
-	"log"
+	"context"
+	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gorilla/mux"
+
+	"gomuncool/internal/handlers"
 )
 
-var Host = ":8080"
+var Host = "0.0.0.0:8080"
+var logger *slog.Logger
 
 func main() {
 
+	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level:     slog.LevelDebug, // Минимальный уровень логирования
+		AddSource: true,            // Добавлять информацию об исходном коде
+
+	})
+	logger = slog.New(handler)
+	slog.SetDefault(logger)
+
 	if err := Run(); err != nil {
-		log.Printf("Server Shutdown by syscall, ListenAndServe message -  %v\n", err)
+		logger.Error("Server Shutdown by syscall", "ListenAndServe message ", err.Error())
 	}
 }
 
@@ -24,9 +39,34 @@ func Run() (err error) {
 	router.HandleFunc("/cap", handlers.Cap).Methods("GET")
 
 	httpServer := http.Server{Addr: Host, Handler: router}
-	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
+
+	// Channel to listen for interrupts
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	// Run server in a goroutine
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("ListenAndServe", "err is ", err.Error())
+			os.Exit(1)
+		}
+	}()
+	logger.Info("HTTP server started")
+
+	<-done
+	logger.Info("Server is shutting down...")
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Shutdown server
+	if err := httpServer.Shutdown(ctx); err != nil {
+		logger.Error("Server shutdown failed", "err is ", err.Error())
+		os.Exit(1)
+
 	}
+	logger.Info("Server stopped gracefully")
 
 	return nil
 }
