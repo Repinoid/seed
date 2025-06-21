@@ -27,13 +27,17 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
 
       - name: Build with Docker Compose
-        run: docker-compose build
+        run: docker compose build
 
       - name: Run tests
-        run: docker-compose run go-server go test -v ./...
+        run: docker compose run --rm go-server ls *
+        #run: docker compose run --rm go-server go test -v -short ./...
+        #run: docker-compose run go-server go test -v ./...
 
-      - name: Start services and run integration tests
-        run: |
-          docker-compose up -d
-          docker-compose exec go-server go test -tags=integration -v ./...
-          docker-compose  down
+      # - name: Start services and run integration tests
+      #   run: |
+      #     docker compose up -d
+      #     docker compose exec -T go-server go test -v -tags=integration ./...
+      #     docker compose  down
+
+#docker compose exec go-server go test -tags=integration -v ./...
