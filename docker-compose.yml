@@ -1,22 +1,4 @@
-# Три контейнера - сервер, агент и база данных
-
 services:
-  # go_db:
-  #   container_name: go_db
-  #   # имя образа из которого создастся база данных
-  #   image: postgres
-  #   environment:
-  #     POSTGRES_PASSWORD: parole
-  #     POSTGRES_USER: username
-  #     POSTGRES_DB: postgres
-  #   ports:
-  #     - target: 5432 
-  #       published: 5433
-  #       protocol: tcp
-  #   volumes:
-  #     - oblbibl:/var/lib/postgresql/data
-  #   networks:
-  #     - localnet
 
 # Server
   go-server:
@@ -28,46 +10,15 @@ services:
       context: ./
     # докерфайл
       dockerfile: ServerDockerFile
-    environment:
-    # переменные окружения для сервера
-    # host= Data Base container_name, user password dbname см.ниже, в описании контейнера базы данных
-      DATABASE_DSN:   "host=go_db user=username password=parole dbname=postgres sslmode=disable"
-      ADDRESS:        ":8080"
     ports:
     # server port http.ListenAndServe(":8080", router)
       - target: 8080
     # published port - внешний, доступ по CURL или HTTP
         published: 8100
         protocol: tcp
-    #depends_on:
-    # зависимость go-server от go_db. сначала запускается База Данных
-    # - go_db
     networks:
       - localnet
 
-# Agent
-#   go-agent:
-#     container_name: go-agent
-#     # имя создаваемого образа
-#     image: imanagent
-#     build:
-#     # путь до докерфайла
-#       context: ./
-#     # докерфайл
-#       dockerfile: AgentDockerFile
-#     links:
-#       - go-server
-#     environment:
-# #      имя-сервера:порт
-#       ADDRESS:        "go-server:8080"
-#     ports:
-#       - target: 8080
-#         protocol: tcp
-#     depends_on:
-#     # зависимость go-agent от go-server. сначала запускается server
-#       - go-server
-#     networks:
-#       - localnet
 
 volumes:
  oblbibl:
@@ -75,9 +26,4 @@ volumes:
 networks:
   localnet:
     driver: bridge
-
-# и проверяем в консоли
-# curl localhost:8000/update/ -H "Content-Type":"application/json" -d "{\"type\":\"counter\",\"id\":\"PollCount\",\"delta\":77}"
-# или как отсылает агент
-# curl localhost:8000/updates/ -H "Content-Type":"application/json" -d "{\"type\":\"counter\",\"id\":\"Poll1\",\"delta\":77},{\"type\":\"counter\",\"id\":\"PollCount\",\"delta\":177}"
 
