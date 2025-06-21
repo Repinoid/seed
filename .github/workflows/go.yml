@@ -39,13 +39,17 @@ jobs:
       - name: Build with Docker Compose
         run: docker compose build
 
-      - name: Run tests
-        run: |
-          ls -R
+      - name: docker compose LS
           docker compose run --rm go-server pwd
           docker compose run --rm go-server whoami
           docker compose run --rm go-server ls -R
+
+      - name: docker push
           docker-compose push
+
+      # - name: Run tests
+      #   run: |
+      #     ls -R
         #run: docker compose run --rm go-server go test -v -short ./...
         #run: docker-compose run go-server go test -v ./...
 
