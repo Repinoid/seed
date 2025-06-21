@@ -42,7 +42,8 @@ jobs:
       - name: docker compose WHOami
         run:  docker compose run --rm go-server echo -n "pwd "; pwd; echo -n "  whoami  "; whoami
 #          docker compose run --rm go-server echo -n "whoami  "; whoami
-          docker compose run --rm go-server ls -R
+      - name: LS -R
+        run:  docker compose run --rm go-server ls -R
 
       - name: docker push
         run:  docker-compose push
