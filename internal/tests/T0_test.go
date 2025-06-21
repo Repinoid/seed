@@ -28,6 +28,8 @@ func (suite *TstSeed) SetupSuite() {
 	suite.ctx = context.Background()
 	suite.t = time.Now()
 
+	os.Setenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+
 	req := testcontainers.ContainerRequest{
 		Image:        "naeel/iman:latest",
 		ExposedPorts: []string{"8080/tcp"},

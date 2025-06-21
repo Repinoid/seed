@@ -11,20 +11,22 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # копируем server code в контейнер в /wd
-COPY internal internal 
-COPY cmd/server/*.go cmd/server/
+#COPY internal internal 
+#COPY cmd/server/*.go cmd/server/
+COPY . . 
 
 # меняем рабочую директорию на папку с кодом сервера 
-WORKDIR /wd/cmd/server
+#WORKDIR /wd/cmd/server
 # создаём исполняемый файл servak в /wd/cmd/server
-RUN go build -o servak
+RUN go build -o servak ./cmd/server
 
 # грузим чистый образ, в нём будет только исполняемый файл сервера
-FROM golang:alpine AS runner  
+#FROM golang:alpine AS runner  
 
 # копируем сбилденный /wd/cmd/server/servak в корень / runner
-COPY --from=builder /wd/cmd/server/servak / 
+#COPY --from=builder /wd/cmd/server/servak / 
 
+WORKDIR /wd  
 # открываем порт 
 # такой же как на сервере, в http.ListenAndServe
 EXPOSE 8080 
