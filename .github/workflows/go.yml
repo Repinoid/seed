@@ -39,9 +39,8 @@ jobs:
       - name: Build with Docker Compose
         run: docker compose build
 
-      - name: docker compose LS
-        run: |
-          docker compose run --rm go-server echo -n "pwd "; pwd; echo -n "  whoami  "; whoami
+      - name: docker compose WHOami
+        run:  docker compose run --rm go-server echo -n "pwd "; pwd; echo -n "  whoami  "; whoami
 #          docker compose run --rm go-server echo -n "whoami  "; whoami
           docker compose run --rm go-server ls -R
 
