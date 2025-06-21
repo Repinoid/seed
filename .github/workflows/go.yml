@@ -48,8 +48,7 @@ jobs:
       - name: docker push
         run:  docker-compose push
 
-notifications:
-  email: false  # Отключает email-уведомления
+
 
       # - name: Run tests
       #   run: |
