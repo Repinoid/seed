@@ -3,9 +3,9 @@
 
 name: Go Docker Compose CI
 
-on: workflow_dispatch
-#  push:
-#    branches: [ "main" ]
+on: # workflow_dispatch
+  push:
+    branches: [ "main" ]
 #  pull_request:
 #    branches: [ "main" ]
 
