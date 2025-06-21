@@ -32,8 +32,7 @@ jobs:
       - name: Run tests
         run: |
           ls -R
-          ls /cmd/server/*
-        #run: docker compose run --rm go-server ls *
+          docker compose run --rm go-server ls -R
         #run: docker compose run --rm go-server go test -v -short ./...
         #run: docker-compose run go-server go test -v ./...
 
