@@ -10,7 +10,7 @@ on: # workflow_dispatch
 #    branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,12 +41,15 @@ jobs:
 
       - name: docker compose LS
         run: |
-          docker compose run --rm go-server pwd
-          docker compose run --rm go-server whoami
+          docker compose run --rm go-server echo -n "pwd "; pwd
+          docker compose run --rm go-server echo -n "whoami "; whoami
           docker compose run --rm go-server ls -R
 
       - name: docker push
         run:  docker-compose push
+
+notifications:
+  email: false  # Отключает email-уведомления
 
       # - name: Run tests
       #   run: |
