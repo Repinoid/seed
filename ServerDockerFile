@@ -20,15 +20,15 @@ WORKDIR /wd/cmd/server
 RUN go build -o servak
 
 # грузим чистый образ, в нём будет только исполняемый файл сервера
-#FROM golang:alpine AS runner  
+FROM golang:alpine AS runner  
 
 # копируем сбилденный /wd/cmd/server/servak в корень / runner
-#COPY --from=builder /wd/cmd/server/servak / 
+COPY --from=builder /wd/cmd/server/servak / 
 
 # открываем порт 
 # такой же как на сервере, в http.ListenAndServe
 EXPOSE 8080 
 
 # запускаем исполняемый файл servak
-CMD [".cmd/server/servak"] 
+CMD ["./servak"] 
 
