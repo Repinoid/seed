@@ -12,10 +12,12 @@ import (
 	"github.com/gorilla/mux"
 
 	"gomuncool/internal/handlers"
+	"gomuncool/internal/models"
 )
 
 var Host = "0.0.0.0:8080"
-var logger *slog.Logger
+
+//var models.Logger *slog.models.Logger
 
 func main() {
 
@@ -24,11 +26,11 @@ func main() {
 		AddSource: true,            // Добавлять информацию об исходном коде
 
 	})
-	logger = slog.New(handler)
-	slog.SetDefault(logger)
+	models.Logger = slog.New(handler)
+	slog.SetDefault(models.Logger)
 
 	if err := Run(); err != nil {
-		logger.Error("Server Shutdown by syscall", "ListenAndServe message ", err.Error())
+		models.Logger.Error("Server Shutdown by syscall", "ListenAndServe message ", err.Error())
 	}
 }
 
@@ -47,14 +49,14 @@ func Run() (err error) {
 	// Run server in a goroutine
 	go func() {
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Error("ListenAndServe", "err is ", err.Error())
+			models.Logger.Error("ListenAndServe", "err is ", err.Error())
 			os.Exit(1)
 		}
 	}()
-	logger.Info("HTTP server started")
+	models.Logger.Info("HTTP server started")
 
 	<-done
-	logger.Info("Server is shutting down...")
+	models.Logger.Info("Server is shutting down...")
 
 	// Create context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -62,11 +64,11 @@ func Run() (err error) {
 
 	// Shutdown server
 	if err := httpServer.Shutdown(ctx); err != nil {
-		logger.Error("Server shutdown failed", "err is ", err.Error())
+		models.Logger.Error("Server shutdown failed", "err is ", err.Error())
 		os.Exit(1)
 
 	}
-	logger.Info("Server stopped gracefully")
+	models.Logger.Info("Server stopped gracefully")
 
 	return nil
 }

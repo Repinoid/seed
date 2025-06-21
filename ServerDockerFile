@@ -1,0 +1,34 @@
+# builder будет использоваться для создания исполняемого файла сервера
+FROM golang:alpine AS builder
+
+# WORKDIR - рабочая директория в контейнере
+WORKDIR /wd  
+
+# dependicies
+# ./ - путь в контейнере
+COPY go.mod go.sum ./
+# явно грузим зависимости
+RUN go mod download
+
+# копируем server code в контейнер в /wd
+COPY internal internal 
+COPY cmd/server/*.go cmd/server/
+
+# меняем рабочую директорию на папку с кодом сервера 
+WORKDIR /wd/cmd/server
+# создаём исполняемый файл servak в /wd/cmd/server
+RUN go build -o servak
+
+# грузим чистый образ, в нём будет только исполняемый файл сервера
+FROM alpine AS runner  
+
+# копируем сбилденный /wd/cmd/server/servak в корень / runner
+COPY --from=builder /wd/cmd/server/servak / 
+
+# открываем порт 
+# такой же как на сервере, в http.ListenAndServe
+EXPOSE 8080 
+
+# запускаем исполняемый файл servak
+CMD ["./servak"] 
+
