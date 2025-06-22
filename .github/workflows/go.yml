@@ -64,6 +64,7 @@ jobs:
       - name: Start services and run integration tests
         run: |
           docker compose up -d
+          docker compose exec -T go-server go env GOFLAGS
           docker compose exec -T go-server go test -v -tags=integration ./...
           docker compose  down
 
