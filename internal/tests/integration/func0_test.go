@@ -3,13 +3,15 @@ package tests
 import (
 	"io"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestCap(t *testing.T) {
-	resp, err := http.Get("http://0.0.0.0:8080/cap")
+	port := os.Getenv("EXTERNAL_PORT")
+	resp, err := http.Get("http://0.0.0.0:" + port + "/cap")
 	require.NoError(t, err)
 	defer resp.Body.Close()
 	require.EqualValues(t, http.StatusOK, resp.StatusCode)
