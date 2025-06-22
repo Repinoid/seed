@@ -12,13 +12,14 @@ services:
       dockerfile: ServerDockerFile
     # переменные окружения для сервера
     environment:
-      INTERNAL_PORT: "8080"
-      EXTERNAL_PORT: "8100"
+      CONTAINER_PORT: "8080"
+      HOST_PORT: "8100"
     ports:
     # server port http.ListenAndServe(":8080", router)
-      - target: "8080"
+      - target: ${HOST_PORT}
+#      - target: "8080"
     # published port - внешний, доступ по CURL или HTTP
-        published: "8100"
+        published: ${CONTAINER_PORT}
         protocol: tcp
     networks:
       - localnet
