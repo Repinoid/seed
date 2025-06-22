@@ -40,13 +40,16 @@ jobs:
         run: docker compose build
 
       - name: docker compose WHOami
-        run:  docker compose run --rm go-server echo -n "pwd "; pwd; echo -n "  whoami  "; whoami
+        run:  docker compose run --rm go-server echo -n "pwd "; pwd; echo -n "whoami  "; whoami
 #          docker compose run --rm go-server echo -n "whoami  "; whoami
       - name: LS -R
         run:  docker compose run --rm go-server ls -R
 
-      - name: docker push
-        run:  docker-compose push
+      - name: Go Test
+        run:  go test -v ./...
+
+      # - name: docker push
+      #   run:  docker-compose push
 
 
 
