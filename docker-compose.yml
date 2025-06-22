@@ -16,10 +16,10 @@ services:
       HOST_PORT: "8100"
     ports:
     # server port http.ListenAndServe(":8080", router)
-      - target: ${HOST_PORT}
+      - target: "${HOST_PORT}"
 #      - target: "8080"
     # published port - внешний, доступ по CURL или HTTP
-        published: ${CONTAINER_PORT}
+        published: "${CONTAINER_PORT}"
         protocol: tcp
     networks:
       - localnet
