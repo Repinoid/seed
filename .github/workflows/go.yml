@@ -21,8 +21,8 @@ jobs:
         with:
           go-version: '1.21' # Update to your Go version
 
-      - name: Go Test
-        run:  go test -v ./...
+      - name: Go UNIT Test
+        run:  go test -v ./internal/tests/unit
 
       # - name: Set up Docker
       #   uses: docker/setup-qemu-action@v1
@@ -64,7 +64,7 @@ jobs:
       - name: Start services and run integration tests
         run: |
           docker compose up -d
-          docker compose exec -T go-server go test -run TestCap  ./...
+          docker compose exec -T go-server go test ./internal/tests/integration
           docker compose  down
 
        #   docker compose exec -T go-server go env GOFLAGS
