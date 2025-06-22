@@ -10,8 +10,11 @@ import (
 )
 
 func TestCap(t *testing.T) {
-	port := os.Getenv("PORT")
-//	hoster, exists := os.LookupEnv("ADDRESS")
+
+	port, exists := os.LookupEnv("PORTOS")
+	if ! exists {
+		port = "8080"
+	}
 
 	resp, err := http.Get("http://0.0.0.0:" + port + "/cap")
 	require.NoError(t, err)
