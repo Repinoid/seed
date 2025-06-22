@@ -9,7 +9,7 @@ import (
 )
 
 func TestCap(t *testing.T) {
-	resp, err := http.Get("http://0.0.0.0:8100/cap")
+	resp, err := http.Get("http://0.0.0.0:8080/cap")
 	require.NoError(t, err)
 	defer resp.Body.Close()
 	require.EqualValues(t, http.StatusOK, resp.StatusCode)
