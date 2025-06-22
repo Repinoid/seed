@@ -64,6 +64,6 @@ jobs:
         run: |
           docker compose up -d
           docker compose exec -T -e PORT="8080"  go-server go test -v ./internal/tests/integration 
-          env PORT="8101" go test -v ./internal/tests/integration 
+          env PORT="8100" go test -v ./internal/tests/integration 
           docker compose  down
 
