@@ -63,6 +63,6 @@ jobs:
       - name: Start services and run integration tests
         run: |
           docker compose up -d
-          docker compose exec -T -e EXTERNAL_PORT="8100"  go-server go test ./internal/tests/integration -v
+          docker compose exec -T -e PORT="8080"  go-server go test ./internal/tests/integration -v
           docker compose  down
 

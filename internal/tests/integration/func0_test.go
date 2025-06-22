@@ -10,7 +10,9 @@ import (
 )
 
 func TestCap(t *testing.T) {
-	port := os.Getenv("EXTERNAL_PORT")
+	port := os.Getenv("PORT")
+//	hoster, exists := os.LookupEnv("ADDRESS")
+
 	resp, err := http.Get("http://0.0.0.0:" + port + "/cap")
 	require.NoError(t, err)
 	defer resp.Body.Close()
