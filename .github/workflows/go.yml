@@ -64,7 +64,7 @@ jobs:
         run: |
           docker compose up -d
           docker compose exec -T  go-server go test -v ./internal/tests/integration 
-#          docker compose exec -T -e PORTOS="8080"  go-server go test -v ./internal/tests/integration 
           env PORTOS="8100" go test -v ./internal/tests/integration 
           docker compose  down
 
+#          docker compose exec -T -e PORTOS="8080"  go-server go test -v ./internal/tests/integration 
