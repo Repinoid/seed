@@ -19,16 +19,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21' # Update to your Go version
+          go-version: '1.23' # Update to your Go version
 
       - name: Go UNIT Test
         run:  go test -v ./internal/tests/unit
-
-      # - name: Set up Docker
-      #   uses: docker/setup-qemu-action@v1
-      #   uses: docker/setup-buildx-action@v1
-      #   uses: docker/setup-action@v1     
-
 
       - name: Install Docker Compose
         run: |
@@ -40,7 +34,6 @@ jobs:
 
       - name: docker compose WHOami
         run:  docker compose run --rm go-server echo -n "pwd "; pwd; echo -n "whoami  "; whoami
-#          docker compose run --rm go-server echo -n "whoami  "; whoami
       - name: LS -R
         run:  docker compose run --rm go-server ls -R
 
@@ -50,16 +43,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}     
-      # - name: docker push
-      #   run:  docker-compose push
 
-
-
-      # - name: Run tests
-      #   run: |
-      #     ls -R
-        #run: docker compose run --rm go-server go test -v -short ./...
-        #run: docker-compose run go-server go test -v ./...
+      - name: docker PUSH
+        run:  docker-compose push
 
       - name: Start services and run integration tests
         run: |
@@ -67,6 +53,3 @@ jobs:
           docker compose exec -T go-server go test ./internal/tests/integration -v
           docker compose  down
 
-       #   docker compose exec -T go-server go env GOFLAGS
-        # docker compose exec -T go-server go test -v -tags=integration ./...
-#docker compose exec go-server go test -tags=integration -v ./...
