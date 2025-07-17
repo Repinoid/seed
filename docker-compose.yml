@@ -1,4 +1,21 @@
 services:
+  go_db:
+    container_name: db_container_name
+    # имя образа из которого создастся база данных
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: parole
+      POSTGRES_USER: uname
+      POSTGRES_DB: dbase
+    ports:
+      - target: 5432 
+        published: 5433
+        protocol: tcp
+    volumes:
+      - oblbibl:/var/lib/postgresql/data
+    networks:
+      - localnet
+
 
 # Server
   go-server:
@@ -10,6 +27,11 @@ services:
       context: ./
     # докерфайл
       dockerfile: ServerDockerFile
+    environment:
+    # переменные окружения для сервера
+    # host= Data Base container_name, user password dbname см.ниже, в описании контейнера базы данных
+      DATABASE_DSN:   "host=go_db user=uname password=parole dbname=dbase sslmode=disable"
+      ADDRESS:        ":8080"
     
     ports:
     # published port - внешний, доступ по CURL или HTTP

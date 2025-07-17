@@ -5,6 +5,10 @@ import (
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/mux"
+
+	"gomuncool/internal/models"
 )
 
 func Cap(rwr http.ResponseWriter, req *http.Request) {
@@ -37,4 +41,43 @@ func getIP(r *http.Request) string {
 	}
 
 	return ip
+}
+
+func GetUser(rwr http.ResponseWriter, req *http.Request) {
+	rwr.Header().Set("Content-Type", "text/html")
+	vars := mux.Vars(req)
+	userName := vars["userName"]
+
+	role, err := models.DataBase.GetUser(req.Context(), userName)
+	if err != nil {
+		rwr.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(rwr, `{"wrong user name":"%s"}`, userName)
+		return
+	}
+	rwr.WriteHeader(http.StatusOK)
+	fmt.Fprintf(rwr, `{"user":"%s", "role":"%s"}`, userName, role)
+
+}
+
+func PutUser(rwr http.ResponseWriter, req *http.Request) {
+
+	rwr.Header().Set("Content-Type", "text/html")
+	vars := mux.Vars(req)
+	userName := vars["userName"]
+	role := vars["role"]
+
+	if userName == "" || role == "" {
+		rwr.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(rwr, `{"status":"StatusBadRequest"}`)
+		return
+	}
+	err := models.DataBase.PutUser(req.Context(), userName, role)
+	if err != nil {
+		rwr.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(rwr, `{"BAD user":"%s", "role":"%s"}`, userName, role)
+		return
+	}
+	rwr.WriteHeader(http.StatusOK)
+	fmt.Fprintf(rwr, `{"user added":"%s", "with role":"%s"}`, userName, role)
+
 }

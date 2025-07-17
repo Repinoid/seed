@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"gomuncool/internal/dbase"
 	"gomuncool/internal/handlers"
 	"gomuncool/internal/models"
 )
@@ -20,25 +21,46 @@ var Host = "0.0.0.0:8080"
 //var models.Logger *slog.models.Logger
 
 func main() {
+	ctx := context.Background()
 
 	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level:     slog.LevelDebug, // Минимальный уровень логирования
 		AddSource: true,            // Добавлять информацию об исходном коде
-
 	})
 	models.Logger = slog.New(handler)
 	slog.SetDefault(models.Logger)
 
-	if err := Run(); err != nil {
+	// DaraBase Endpoint - if exists in Environment variable, if not - default
+	enva, exists := os.LookupEnv("DATABASE_DSN")
+	if exists {
+		models.DBEndPoint = enva
+	}
+
+	db, err := dbase.ConnectToDB(ctx, models.DBEndPoint)
+	if err != nil {
+		models.Logger.Error("Can't connect to DB", "", err.Error())
+		return
+	}
+	defer db.CloseBase()
+
+	if err = db.UsersTableCreation(ctx); err != nil {
+		models.Logger.Error("UsersTableCreation", "", err.Error())
+		return
+	}
+	models.DataBase = db
+
+	if err := Run(ctx); err != nil {
 		models.Logger.Error("Server Shutdown by syscall", "ListenAndServe message ", err.Error())
 	}
 }
 
 // run. Запуск сервера и хендлеры
-func Run() (err error) {
+func Run(ctx context.Context) (err error) {
 
 	router := mux.NewRouter()
-	router.HandleFunc("/cap", handlers.Cap).Methods("GET")
+	router.HandleFunc("/", handlers.Cap).Methods("GET")
+	router.HandleFunc("/put/{userName}/{role}", handlers.PutUser).Methods("POST")
+	router.HandleFunc("/get/{userName}", handlers.GetUser).Methods("GET")
 
 	httpServer := http.Server{Addr: Host, Handler: router}
 
@@ -59,7 +81,7 @@ func Run() (err error) {
 	models.Logger.Info("Server is shutting down...")
 
 	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	// Shutdown server
