@@ -23,7 +23,7 @@ var Host = "0.0.0.0:8080"
 func main() {
 	ctx := context.Background()
 
-	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level:     slog.LevelDebug, // Минимальный уровень логирования
 		AddSource: true,            // Добавлять информацию об исходном коде
 	})
