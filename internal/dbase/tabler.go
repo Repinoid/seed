@@ -3,6 +3,7 @@ package dbase
 import (
 	"context"
 	"fmt"
+	"gomuncool/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,6 +16,7 @@ type DBstruct struct {
 // ConnectToDB получить эндпоинт Базы Данных
 func ConnectToDB(ctx context.Context, DBEndPoint string) (dataBase *DBstruct, err error) {
 
+	models.Logger.Info("DB to connect")
 	//	baza, err := pgx.Connect(ctx, DBEndPoint)
 	baza, err := pgxpool.New(ctx, DBEndPoint)
 	if err != nil {
