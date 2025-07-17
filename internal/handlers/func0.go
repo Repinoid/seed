@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"gomuncool/internal/dbase"
 	"gomuncool/internal/models"
 )
 
@@ -48,10 +49,11 @@ func GetUser(rwr http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	userName := vars["userName"]
 
-	role, err := models.DataBase.GetUser(req.Context(), userName)
+	role, err := dbase.DataBase.GetUser(req.Context(), userName)
 	if err != nil {
 		rwr.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(rwr, `{"wrong user name":"%s"}`, userName)
+		models.Logger.Error("wrong user name")
 		return
 	}
 	rwr.WriteHeader(http.StatusOK)
@@ -71,10 +73,11 @@ func PutUser(rwr http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(rwr, `{"status":"StatusBadRequest"}`)
 		return
 	}
-	err := models.DataBase.PutUser(req.Context(), userName, role)
+	err := dbase.DataBase.PutUser(req.Context(), userName, role)
 	if err != nil {
 		rwr.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(rwr, `{"BAD user":"%s", "err":"%v"}`, userName, err)
+		models.Logger.Error("wrong user")
 		return
 	}
 	rwr.WriteHeader(http.StatusOK)

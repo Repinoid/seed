@@ -3,6 +3,7 @@ package dbase
 import (
 	"context"
 	"fmt"
+	"gomuncool/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -11,6 +12,8 @@ type DBstruct struct {
 	//	DB     *pgx.Conn
 	DB *pgxpool.Pool
 }
+
+var DataBase *DBstruct
 
 // ConnectToDB получить эндпоинт Базы Данных
 func ConnectToDB(ctx context.Context, DBEndPoint string) (dataBase *DBstruct, err error) {
@@ -25,6 +28,7 @@ func ConnectToDB(ctx context.Context, DBEndPoint string) (dataBase *DBstruct, er
 		return nil, fmt.Errorf("ping. can't connect to DB %s err %w", DBEndPoint, err)
 	}
 	dataBase = &DBstruct{DB: baza} // Initialize
+	models.Logger.Debug("DB connected")
 
 	return
 }
@@ -35,6 +39,7 @@ func (dataBase *DBstruct) UsersTableCreation(ctx context.Context) error {
 	db := dataBase.DB
 	_, err := db.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS pgcrypto;") // расширение для хэширования паролей
 	if err != nil {
+		models.Logger.Error("error CREATE EXTENSION pgcrypto")
 		return fmt.Errorf("error CREATE EXTENSION pgcrypto; %w", err)
 	}
 
@@ -47,9 +52,10 @@ func (dataBase *DBstruct) UsersTableCreation(ctx context.Context) error {
 
 	_, err = db.Exec(ctx, creatorOrder)
 	if err != nil {
+		models.Logger.Error("error CREATE USERA table")
 		return fmt.Errorf("create USERS table. %w", err)
 	}
-	//	models.Sugar.Debugln("USERA table is created")
+	models.Logger.Debug("USERA table is created")
 	return nil
 }
 

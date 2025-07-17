@@ -47,8 +47,8 @@ func main() {
 		models.Logger.Error("UsersTableCreation", "", err.Error())
 		return
 	}
-	models.Logger.Warn("DB connected")
-	models.DataBase = db
+	models.Logger.Debug("DB connected")
+	dbase.DataBase = db
 
 	if err := Run(ctx); err != nil {
 		models.Logger.Error("Server Shutdown by syscall", "ListenAndServe message ", err.Error())
@@ -76,7 +76,7 @@ func Run(ctx context.Context) (err error) {
 			os.Exit(1)
 		}
 	}()
-	models.Logger.Info("HTTP server started")
+	models.Logger.Info("HTTP server started HAZER")
 
 	<-done
 	models.Logger.Info("Server is shutting down...")
