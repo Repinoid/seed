@@ -9,13 +9,28 @@ services:
       POSTGRES_DB: dbase
     ports:
       - target: 5432 
-        published: 5433
+        published: 5432
         protocol: tcp
     volumes:
       - oblbibl:/var/lib/postgresql/data
     networks:
       - localnet
 
+  pgadmin:
+      image: dpage/pgadmin4:latest
+      container_name: pgadmin
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@example.com
+        PGADMIN_DEFAULT_PASSWORD: passs
+      volumes:
+        - pgadmin_data:/var/lib/pgadmin
+      ports:
+        - "8100:80"
+      depends_on:
+        - go_db
+      networks:
+        - localnet
+        
 
 # Server
   go-server:
@@ -35,16 +50,20 @@ services:
     
     ports:
     # published port - внешний, доступ по CURL или HTTP
-      - published: 8100
+      - published: 8888
     # порт контейнера. задан в коде server port http.ListenAndServe(":8080", router)
         target: 8080
         protocol: tcp
     networks:
       - localnet
+    depends_on:
+      - go_db
+
 
 
 volumes:
  oblbibl:
+ pgadmin_data:
 
 networks:
   localnet:

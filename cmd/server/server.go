@@ -59,7 +59,7 @@ func Run(ctx context.Context) (err error) {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", handlers.Cap).Methods("GET")
-	router.HandleFunc("/put/{userName}/{role}", handlers.PutUser).Methods("POST")
+	router.HandleFunc("/put/{userName}/{role}", handlers.PutUser).Methods("GET")
 	router.HandleFunc("/get/{userName}", handlers.GetUser).Methods("GET")
 
 	httpServer := http.Server{Addr: Host, Handler: router}

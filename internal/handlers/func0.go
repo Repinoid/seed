@@ -74,7 +74,7 @@ func PutUser(rwr http.ResponseWriter, req *http.Request) {
 	err := models.DataBase.PutUser(req.Context(), userName, role)
 	if err != nil {
 		rwr.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rwr, `{"BAD user":"%s", "role":"%s"}`, userName, role)
+		fmt.Fprintf(rwr, `{"BAD user":"%s", "err":"%v"}`, userName, err)
 		return
 	}
 	rwr.WriteHeader(http.StatusOK)

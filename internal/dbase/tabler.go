@@ -43,11 +43,7 @@ func (dataBase *DBstruct) UsersTableCreation(ctx context.Context) error {
 		"CREATE TABLE IF NOT EXISTS USERA" +
 			"(userId INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, " +
 			"username VARCHAR(64) UNIQUE, " +
-			"password TEXT NOT NULL, " +
-			"bucketname VARCHAR(64) NOT NULL, " +
-			"bucketkey TEXT NOT NULL, " +
 			"metadata TEXT, " +
-			"roles int, " +
 			"user_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
 
 	_, err = db.Exec(ctx, creatorOrder)
@@ -76,8 +72,8 @@ func (dataBase *DBstruct) GetUser(ctx context.Context, uname string) (meta strin
 
 func (dataBase *DBstruct) PutUser(ctx context.Context, uname, meta string) (err error) {
 
-	order := "INSERT INTO USERA AS args(username, metadata) VALUES ('$1','$2') "
-	order += "ON CONFLICT (username) DO UPDATE SET username=args.metricname, metadata=args.metadata+EXCLUDED.metadata;"
+	order := "INSERT INTO USERA AS args(username, metadata) VALUES ($1,$2)" +
+		"ON CONFLICT (username) DO UPDATE SET username=args.username, metadata=args.metadata;"
 	// args.value - старое значение. EXCLUDED.value - новое, переданное для вставки или обновления
 	_, err = dataBase.DB.Exec(ctx, order, uname, meta)
 	if err != nil {
