@@ -33,7 +33,7 @@ func (suite *TstSeed) SetupSuite() {
 	req := testcontainers.ContainerRequest{
 		Image:        "naeel/iman:latest",
 		ExposedPorts: []string{"8080/tcp"},
-		WaitingFor:   wait.ForListeningPort("8080/tcp"),
+		WaitingFor:   wait.ForListeningPort("8080/tcp").WithStartupTimeout(120 * time.Second),
 	}
 	var err error
 	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
