@@ -7,7 +7,7 @@ import (
 
 func (suite *TstSeed) Test01CheckServer() {
 
-	resp, err := http.Get("http://" + suite.host + ":" + suite.port.Port() + "/cap")
+	resp, err := http.Get("http://" + suite.host + ":" + suite.port.Port() + "/")
 	suite.Require().NoError(err)
 	defer resp.Body.Close()
 	suite.Require().EqualValues(http.StatusOK, resp.StatusCode)
