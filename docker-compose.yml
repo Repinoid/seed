@@ -20,8 +20,8 @@ services:
       image: dpage/pgadmin4:latest
       container_name: pgadmin
       environment:
-        PGADMIN_DEFAULT_EMAIL: admin@example.com
-        PGADMIN_DEFAULT_PASSWORD: passs
+        PGADMIN_DEFAULT_EMAIL: a@e.e
+        PGADMIN_DEFAULT_PASSWORD: p
       volumes:
         - pgadmin_data:/var/lib/pgadmin
       ports:
@@ -47,13 +47,13 @@ services:
     # host= Data Base container_name, user password dbname см.ниже, в описании контейнера базы данных
       DATABASE_DSN:   "host=go_db user=uname password=parole dbname=dbase sslmode=disable"
       ADDRESS:        ":8080"
-    
     ports:
     # published port - внешний, доступ по CURL или HTTP
       - published: 8888
     # порт контейнера. задан в коде server port http.ListenAndServe(":8080", router)
         target: 8080
         protocol: tcp
+    # restart: unless-stopped
     networks:
       - localnet
     depends_on:

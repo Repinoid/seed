@@ -47,6 +47,7 @@ func main() {
 		models.Logger.Error("UsersTableCreation", "", err.Error())
 		return
 	}
+	models.Logger.Info("DB connected")
 	models.DataBase = db
 
 	if err := Run(ctx); err != nil {
