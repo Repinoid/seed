@@ -64,8 +64,8 @@ jobs:
         run: |
           docker compose up -d
 
-            # засылаем внутренний порт контейнера 8080, т.к. тесты запускаются ВНУТРИ контейнера
-          docker compose exec -T -e PORTOS="8080"  go-server go test -v ./internal/tests/integration 
+            # засылаем внутренний порт контейнера 80, т.к. тесты запускаются ВНУТРИ контейнера
+          docker compose exec -T -e PORTOS="80"  go-server go test -v ./internal/tests/integration 
 
             # засылаем внешний порт 8100, т.к. тесты запускаются снаружи контейнера, на виртуальной машине GitHub
           env PORTOS="8100" go test -v ./internal/tests/integration 

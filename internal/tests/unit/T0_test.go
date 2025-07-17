@@ -32,8 +32,8 @@ func (suite *TstSeed) SetupSuite() {
 
 	req := testcontainers.ContainerRequest{
 		Image:        "naeel/iman:latest",
-		ExposedPorts: []string{"8080/tcp"},
-		WaitingFor:   wait.ForListeningPort("8080/tcp"),
+		ExposedPorts: []string{"80/tcp"},
+		WaitingFor:   wait.ForListeningPort("80/tcp"),
 	}
 	var err error
 	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
@@ -45,7 +45,7 @@ func (suite *TstSeed) SetupSuite() {
 	suite.host, err = suite.servakContainer.Host(suite.ctx)
 	suite.Require().NoError(err)
 	// var
-	suite.port, err = suite.servakContainer.MappedPort(suite.ctx, "8080")
+	suite.port, err = suite.servakContainer.MappedPort(suite.ctx, "80")
 	suite.Require().NoError(err)
 
 }

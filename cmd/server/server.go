@@ -15,7 +15,7 @@ import (
 	"gomuncool/internal/models"
 )
 
-var Host = "0.0.0.0:8080"
+var Host = "0.0.0.0:80"
 
 //var models.Logger *slog.models.Logger
 

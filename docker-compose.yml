@@ -14,8 +14,8 @@ services:
     ports:
     # published port - внешний, доступ по CURL или HTTP
       - published: 8100
-    # порт контейнера. задан в коде server port http.ListenAndServe(":8080", router)
-        target: 8080
+    # порт контейнера. задан в коде server port http.ListenAndServe(":80", router)
+        target: 80
         protocol: tcp
     networks:
       - localnet

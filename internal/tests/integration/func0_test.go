@@ -13,7 +13,7 @@ func TestCap(t *testing.T) {
 
 	port, exists := os.LookupEnv("PORTOS")
 	if ! exists {
-		port = "8080"
+		port = "80"
 	}
 
 	resp, err := http.Get("http://0.0.0.0:" + port + "/cap")

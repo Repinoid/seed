@@ -29,7 +29,7 @@ RUN go build -o servak ./cmd/server
 WORKDIR /wd  
 # открываем порт 
 # такой же как на сервере, в http.ListenAndServe
-EXPOSE 8080 
+EXPOSE 80 
 
 # запускаем исполняемый файл servak
 CMD ["./servak"] 
