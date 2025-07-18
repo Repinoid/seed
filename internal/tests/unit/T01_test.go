@@ -40,6 +40,15 @@ func (suite *TstSeed) Test00InitDB() {
 	}
 }
 
+func (suite *TstSeed) Test01CreateBases() {
+	db, err := dbase.ConnectToDB(suite.ctx, suite.DBEndPoint)
+	suite.Require().NoError(err)
+	// create tables USERA TOKENA DATAS
+	err = db.UsersTableCreation(suite.ctx)
+	suite.Require().NoError(err)
+	db.CloseBase()
+}
+
 // func (suite *TstSeed) aTest01CheckServer() {
 
 // 	resp, err := http.Get("http://" + suite.host + ":" + suite.port.Port() + "/")
