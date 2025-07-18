@@ -16,6 +16,8 @@ import (
 	_ "github.com/lib/pq" // <- Важно: этот импорт регистрирует драйвер
 )
 
+var hostName = "dbhost"
+
 // выполняется перед тестами
 func (suite *TstSeed) SetupSuite() {
 	suite.ctx = context.Background()
@@ -49,7 +51,7 @@ func (suite *TstSeed) SetupSuite() {
 			WithPollInterval(1 * time.Second),
 		Networks: []string{suite.testNet.Name},
 		NetworkAliases: map[string][]string{
-			suite.testNet.Name: {"go-db"}, // <-- Explicit alias
+			suite.testNet.Name: {hostName}, // <-- Explicit alias
 		},
 	}
 
@@ -82,8 +84,8 @@ func (suite *TstSeed) SetupSuite() {
 	suite.Require().NoError(err)
 	db.Close()
 
-	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", suite.pgHost, suite.pgPort.Int())
-	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", "go_db", suite.pgPort.Int())
+	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", suite.pgHost, suite.pgPort.Int())
+	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, suite.pgPort.Int())
 	db, err = sql.Open("postgres", spr)
 	suite.Require().NoError(err)
 	db.Close()
@@ -97,7 +99,7 @@ func (suite *TstSeed) SetupSuite() {
 
 	// ***************** IMANs part begin ************************************
 
-	time.Sleep(10 * time.Second)
+	//time.Sleep(10 * time.Second)
 
 	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
@@ -107,7 +109,7 @@ func (suite *TstSeed) SetupSuite() {
 			Env: map[string]string{
 				//"DATABASE_DSN": models.DBEndPoint,
 				// Use "postgres" (container name) instead of "localhost"
-				"DATABASE_DSN": "host=go_db port=5432 user=testuser password=testpass dbname=testdb sslmode=disable",
+				"DATABASE_DSN": "host=" + hostName + " port=" + suite.pgPort.Port() + " user=testuser password=testpass dbname=testdb sslmode=disable",
 			},
 			WaitingFor: wait.ForAll(
 				wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
