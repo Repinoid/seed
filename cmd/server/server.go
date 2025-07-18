@@ -38,13 +38,13 @@ func main() {
 
 	db, err := dbase.ConnectToDB(ctx, models.DBEndPoint)
 	if err != nil {
-		models.Logger.Error("Can't connect to DB", "", err.Error())
+		models.Logger.Error("Can't connect to DB", "Err is ", err.Error())
 		return
 	}
 	defer db.CloseBase()
 
 	if err = db.UsersTableCreation(ctx); err != nil {
-		models.Logger.Error("UsersTableCreation", "", err.Error())
+		models.Logger.Error("UsersTableCreation", "Err is ", err.Error())
 		return
 	}
 	models.Logger.Debug("DB connected")

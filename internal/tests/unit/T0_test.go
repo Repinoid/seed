@@ -2,27 +2,36 @@ package tests
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"gomuncool/internal/models"
+	"io"
 	"log/slog"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
+
+	_ "github.com/lib/pq" // <- Важно: этот импорт регистрирует драйвер
 )
 
 type TstSeed struct {
 	suite.Suite
 	t   time.Time
 	ctx context.Context
-	//	servakContainer testcontainers.Container
 
-	//host string
-	//port nat.Port
+	testNet *testcontainers.DockerNetwork
+
+	servakContainer testcontainers.Container
+
+	pgHost string
+	pgPort nat.Port
 
 	DBEndPoint        string
 	postgresContainer testcontainers.Container
@@ -35,8 +44,10 @@ func (suite *TstSeed) SetupSuite() {
 
 	os.Setenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 
-	// 1. Create network (simplified modern API)
-	testNet, err := network.New(suite.ctx,
+	var err error
+
+	//  1. Create network (simplified modern API)
+	suite.testNet, err = network.New(suite.ctx,
 		network.WithAttachable(),
 		network.WithLabels(map[string]string{
 			"test": "handlers-suite",
@@ -45,11 +56,6 @@ func (suite *TstSeed) SetupSuite() {
 	if err != nil {
 		suite.FailNowf("Failed to create network: %v", err.Error())
 	}
-	defer func() {
-		if err := testNet.Remove(suite.ctx); err != nil {
-			suite.T().Logf("Network cleanup warning: %v", err)
-		}
-	}()
 
 	// ***************** POSTGREs part begin ************************************
 	// Запуск контейнера PostgreSQL
@@ -64,7 +70,7 @@ func (suite *TstSeed) SetupSuite() {
 		WaitingFor: wait.ForListeningPort("5432/tcp").
 			WithStartupTimeout(2 * time.Minute).
 			WithPollInterval(1 * time.Second),
-		Networks: []string{testNet.Name},
+		Networks: []string{suite.testNet.Name},
 	}
 
 	postgresContainer, err := testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
@@ -72,18 +78,109 @@ func (suite *TstSeed) SetupSuite() {
 		Started:          true,
 	})
 	suite.Require().NoError(err)
-	//	defer postgresContainer.Terminate(suite.ctx)
 
-	// Получение хоста и порта
-	host, err := postgresContainer.Host(suite.ctx)
+	// Получение хоста и порта postgres
+	suite.pgHost, err = postgresContainer.Host(suite.ctx)
 	suite.Require().NoError(err)
-	port, err := postgresContainer.MappedPort(suite.ctx, "5432")
+	// get externally mapped port for a container port
+	suite.pgPort, err = postgresContainer.MappedPort(suite.ctx, "5432")
 	suite.Require().NoError(err)
-	suite.DBEndPoint = fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb", host, port.Port())
+	suite.DBEndPoint = fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb", suite.pgHost, suite.pgPort.Port())
+	models.DBEndPoint = suite.DBEndPoint
 	suite.postgresContainer = postgresContainer
-	models.Logger.Info("PostgreSQL доступен по адресу: %s:%s", host, port.Port())
+	models.Logger.Info("PostgreSQL доступен по адресу: ",
+		"Host", suite.pgHost,
+		"Port", suite.pgPort.Port())
+
+	// Дополнительная проверка
+	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", suite.pgHost, suite.pgPort.Int())
+	db, err := sql.Open("postgres", models.DBEndPoint)
+	suite.Require().NoError(err)
+	db.Close()
+
+	db, err = sql.Open("postgres", spr)
+	suite.Require().NoError(err)
+	db.Close()
+
+	models.DBEndPoint = spr
+	models.Logger.Info("PostGres GenericContainer Spent ", "", time.Since(suite.t))
+
+	// err = wait.ForSQL("5432/tcp", "postgres", func(host string, port nat.Port) string {
+	// 	return fmt.Sprintf("host=%s port=%d user=user password=password dbname=testdb sslmode=disable", host, port.Int())
+	// }).
+	// 	WithStartupTimeout(30*time.Second).
+	// 	WithPollInterval(1*time.Second). // Добавляем интервал опроса
+	// 	WaitUntilReady(suite.ctx, postgresContainer)
+	//	err = wait.ForSQL("5432/tcp", "postgres", func(host string, port nat.Port) string {
+	// err = wait.ForSQL(suite.pgPort, "postgres", func(host string, port nat.Port) string {
+	// 	return spr
+	// }).WithStartupTimeout(30*time.Second).WaitUntilReady(suite.ctx, postgresContainer)
+	// suite.Require().NoError(err)
 
 	// ***************** POSTGREs part end ************************************
+
+	models.Logger.Info("PostGres GenericContainer Spent ", "", time.Since(suite.t))
+
+	// ***************** IMANs part begin ************************************
+
+	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Image: "iman:1",
+			//Image:        "naeel/iman:latest",
+			ExposedPorts: []string{"8080/tcp"},
+			Env: map[string]string{
+				"DB_HOST":      suite.pgHost,
+				"DB_PORT":      suite.pgPort.Port(),
+				"DB_USER":      "uname",
+				"DB_PASSWORD":  "password",
+				"DB_NAME":      "dbase",
+				"DATABASE_DSN": models.DBEndPoint,
+			},
+			WaitingFor: wait.ForAll(
+				wait.ForListeningPort("8080/tcp"),
+				wait.ForHTTP("/health").WithPort("8080/tcp"),
+				wait.ForLog("HTTP server started"),
+			).WithDeadline(30 * time.Second), //
+			HostConfigModifier: func(hostConfig *container.HostConfig) {
+				hostConfig.PortBindings = nat.PortMap{
+					"8080/tcp": []nat.PortBinding{
+						{
+							HostIP:   "0.0.0.0",
+							HostPort: "8080",
+						},
+					},
+				}
+			},
+		},
+		Started: true,
+		Reuse:   false,
+	})
+
+	models.Logger.Info("Iman's Spent ", "", time.Since(suite.t))
+
+	suite.Assert().NoError(err)
+
+	logsBytes, err := suite.servakContainer.Logs(context.Background())
+	if err != nil {
+		suite.T().Fatal("Failed to get container logs:", err)
+	}
+	defer logsBytes.Close() // Important!
+
+	// Convert to string
+	logs, err := io.ReadAll(logsBytes)
+	if err != nil {
+		suite.T().Fatal("Failed to read container logs:", err)
+	}
+
+	// Print or assert
+	fmt.Println("Container logs:", string(logs))
+	// Or in a test failure:
+	suite.T().Log("Container logs:", string(logs))
+
+	fmt.Println(string(logs))
+	suite.Require().NoError(err)
+
+	// ***************** IMANs part end ************************************
 
 }
 
@@ -91,8 +188,19 @@ func (suite *TstSeed) SetupSuite() {
 func (suite *TstSeed) TearDownSuite() {
 	// Вывод времени исполнения тестов
 	models.Logger.Info("Spent ", "", time.Since(suite.t))
+
 	// убиваем контейнер постгреса
-	suite.postgresContainer.Terminate(suite.ctx)
+	err := suite.postgresContainer.Terminate(suite.ctx)
+	suite.Assert().NoError(err)
+
+	// убиваем контейнер IMAN
+	err = suite.servakContainer.Terminate(suite.ctx)
+	suite.Assert().NoError(err)
+
+	// kill network
+	err = suite.testNet.Remove(suite.ctx)
+	suite.Assert().NoError(err)
+
 }
 
 func TestHandlersSuite(t *testing.T) {

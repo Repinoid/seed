@@ -15,13 +15,13 @@ func (suite *TstSeed) Test00InitDB() {
 	}{
 		{
 			name:    "InitDB Bad BASE",
-			ctx:     context.Background(),
+			ctx:     suite.ctx,
 			dbe:     suite.DBEndPoint + "a",
 			wantErr: true,
 		},
 		{
 			name:    "InitDB Grace manner", // last - RIGHT base params. чтобы база была открыта для дальнейших тестов
-			ctx:     context.Background(),
+			ctx:     suite.ctx,
 			dbe:     suite.DBEndPoint,
 			wantErr: false,
 		},

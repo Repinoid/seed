@@ -42,7 +42,8 @@ services:
     container_name: go-server
     # имя создаваемого образа
     #image: iman:1
-    image: naeel/iman:latest
+    image: iman:1
+    #image: naeel/iman:latest
     build:
     # путь до докерфайла
       context: ./
