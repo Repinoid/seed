@@ -49,6 +49,24 @@ func (suite *TstSeed) Test01CreateBases() {
 	db.CloseBase()
 }
 
+func (suite *TstSeed) Test02AddCheckUser() {
+	db, err := dbase.ConnectToDB(suite.ctx, suite.DBEndPoint)
+	suite.Require().NoError(err)
+	defer db.CloseBase()
+
+	err = db.PutUser(suite.ctx, "userName", "metaData")
+	suite.Require().NoError(err)
+
+	un, err := db.GetUser(suite.ctx, "userName")
+	suite.Require().NoError(err)
+	// Equal(expected interface{}, actual interface{}
+	suite.Equal("metaData", un)
+
+	_, err = db.GetUser(suite.ctx, "userNameWrong")
+	suite.Require().Contains(err.Error(), "unknown user "+"userNameWrong")
+
+}
+
 // func (suite *TstSeed) aTest01CheckServer() {
 
 // 	resp, err := http.Get("http://" + suite.host + ":" + suite.port.Port() + "/")
