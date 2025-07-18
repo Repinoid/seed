@@ -116,7 +116,7 @@ func (suite *TstSeed) SetupSuite() {
 
 	// ***************** IMANs part begin ************************************
 
-	time.Sleep(10*time.Second)
+	time.Sleep(10 * time.Second)
 
 	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
@@ -140,7 +140,7 @@ func (suite *TstSeed) SetupSuite() {
 			WaitingFor: wait.ForAll(
 				wait.ForListeningPort("8080/tcp").WithStartupTimeout(30*time.Second),
 				wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(30*time.Second),
-				wait.ForLog("HTTPa server started"),
+				wait.ForLog("HTTP server started"),
 			).WithDeadline(10 * time.Second), //
 			Networks: []string{suite.testNet.Name},
 			// HostConfigModifier: func(hostConfig *container.HostConfig) {
