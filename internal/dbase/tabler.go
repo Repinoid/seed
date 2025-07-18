@@ -20,7 +20,7 @@ func ConnectToDB(ctx context.Context, DBEndPoint string) (dataBase *DBstruct, er
 	//	baza, err := pgx.Connect(ctx, DBEndPoint)
 	baza, err := pgxpool.New(ctx, DBEndPoint)
 	if err != nil {
-		return nil, fmt.Errorf("pgxpool.New can't connect to DB %s err %w", DBEndPoint, err)
+		return nil, fmt.Errorf("pgx can't connect to DB %s err %w", DBEndPoint, err)
 	}
 	// pgx.Connect возвращает err nil даже если базы не существует. так что пингуем
 	err = baza.Ping(ctx)
@@ -71,6 +71,7 @@ func (dataBase *DBstruct) GetUser(ctx context.Context, uname string) (meta strin
 	if err != nil {
 		return "", fmt.Errorf("unknown user %+v", uname)
 	}
+	models.Logger.Debug("GET user ok")
 	return
 
 }
@@ -84,6 +85,7 @@ func (dataBase *DBstruct) PutUser(ctx context.Context, uname, meta string) (err 
 	if err != nil {
 		return fmt.Errorf("error insert/update %+v error is %w", uname, err)
 	}
+	models.Logger.Debug(" user ok")
 	return
 
 }

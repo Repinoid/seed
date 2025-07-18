@@ -33,6 +33,7 @@ func (suite *TstSeed) Test00InitDB() {
 			if err != nil {
 				models.Logger.Error(err.Error())
 			} else {
+				models.Logger.Debug("connet 2 base OK")
 				db.CloseBase()
 			}
 			suite.Require().Equal(err != nil, tt.wantErr) //

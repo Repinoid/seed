@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -79,12 +78,17 @@ func (suite *TstSeed) SetupSuite() {
 	})
 	suite.Require().NoError(err)
 
+	pgIP, err := postgresContainer.ContainerIP(suite.ctx)
+	_ = pgIP
+	suite.Require().NoError(err)
+
 	// Получение хоста и порта postgres
 	suite.pgHost, err = postgresContainer.Host(suite.ctx)
 	suite.Require().NoError(err)
 	// get externally mapped port for a container port
 	suite.pgPort, err = postgresContainer.MappedPort(suite.ctx, "5432")
 	suite.Require().NoError(err)
+	//suite.DBEndPoint = fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb", suite.pgHost, "5432")
 	suite.DBEndPoint = fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb", suite.pgHost, suite.pgPort.Port())
 	models.DBEndPoint = suite.DBEndPoint
 	suite.postgresContainer = postgresContainer
@@ -93,11 +97,12 @@ func (suite *TstSeed) SetupSuite() {
 		"Port", suite.pgPort.Port())
 
 	// Дополнительная проверка
-	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", suite.pgHost, suite.pgPort.Int())
 	db, err := sql.Open("postgres", models.DBEndPoint)
 	suite.Require().NoError(err)
 	db.Close()
 
+	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", suite.pgHost, suite.pgPort.Int())
+	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", "go_db", suite.pgPort.Int())
 	db, err = sql.Open("postgres", spr)
 	suite.Require().NoError(err)
 	db.Close()
@@ -111,42 +116,50 @@ func (suite *TstSeed) SetupSuite() {
 
 	// ***************** IMANs part begin ************************************
 
+	time.Sleep(10*time.Second)
+
 	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
+			// FromDockerfile: testcontainers.FromDockerfile{
+			// 	Context:    "../../../",
+			// 	Dockerfile: "ServerDockerFile",
+			// },
 			Image: "iman:1",
 			//Image:        "naeel/iman:latest",
 			ExposedPorts: []string{"8080/tcp"},
 			Env: map[string]string{
-				"DB_HOST":      suite.pgHost,
-				"DB_PORT":      suite.pgPort.Port(),
-				"DB_USER":      "testuser",
-				"DB_PASSWORD":  "testpass",
-				"DB_NAME":      "testdb",
+				//"DB_HOST":      suite.pgHost,
+				//"DB_PORT":      suite.pgPort.Port(),
+				// "DB_HOST":      pgIP,
+				// "DB_PORT":      "5432",
+				// "DB_USER":      "testusera",
+				// "DB_PASSWORD":  "testpassa",
+				// "DB_NAME":      "testdba",
 				"DATABASE_DSN": models.DBEndPoint,
 			},
 			WaitingFor: wait.ForAll(
-				wait.ForListeningPort("8080/tcp"),
-				wait.ForHTTP("/health").WithPort("8080/tcp"),
-				wait.ForLog("HTTP server started"),
-			).WithDeadline(15 * time.Second), //
-			HostConfigModifier: func(hostConfig *container.HostConfig) {
-				hostConfig.PortBindings = nat.PortMap{
-					"8080/tcp": []nat.PortBinding{
-						{
-							HostIP:   "0.0.0.0",
-							HostPort: "8080",
-						},
-					},
-				}
-			},
+				wait.ForListeningPort("8080/tcp").WithStartupTimeout(30*time.Second),
+				wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(30*time.Second),
+				wait.ForLog("HTTPa server started"),
+			).WithDeadline(10 * time.Second), //
+			Networks: []string{suite.testNet.Name},
+			// HostConfigModifier: func(hostConfig *container.HostConfig) {
+			// 	hostConfig.PortBindings = nat.PortMap{
+			// 		"8080/tcp": []nat.PortBinding{
+			// 			{
+			// 				HostIP:   "0.0.0.0",
+			// 				HostPort: "8080",
+			// 			},
+			// 		},
+			// 	}
+			// },
 		},
 		Started: true,
 		Reuse:   false,
 	})
+	suite.Assert().NoError(err)
 
 	models.Logger.Info("Iman's Spent ", "", time.Since(suite.t))
-
-	suite.Assert().NoError(err)
 
 	logsBytes, err := suite.servakContainer.Logs(context.Background())
 	if err != nil {

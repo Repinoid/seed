@@ -76,7 +76,7 @@ func Run(ctx context.Context) (err error) {
 			os.Exit(1)
 		}
 	}()
-	models.Logger.Info("HTTP server started HAZER")
+	models.Logger.Info("HTTPa server started NOWA")
 
 	<-done
 	models.Logger.Info("Server is shutting down...")

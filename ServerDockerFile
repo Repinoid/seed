@@ -32,5 +32,5 @@ WORKDIR /wd
 EXPOSE 8080 
 
 # запускаем исполняемый файл servak
-CMD ["./servak"] 
+CMD ["./servak", "--port=8080"] 
 
