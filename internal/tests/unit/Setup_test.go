@@ -16,6 +16,8 @@ import (
 	_ "github.com/lib/pq" // <- Важно: этот импорт регистрирует драйвер
 )
 
+//var hostName = "localhost"
+
 var hostName = "dbhost"
 
 // выполняется перед тестами
@@ -69,6 +71,8 @@ func (suite *TstSeed) SetupSuite() {
 	suite.pgHost, err = postgresContainer.Host(suite.ctx)
 	suite.Require().NoError(err)
 	// get externally mapped port for a container port
+	// Because the randomised port mapping happens during container startup, the container must be running at the time MappedPort is called.
+	// You may need to ensure that the startup order of components in your tests caters for this.
 	suite.pgPort, err = postgresContainer.MappedPort(suite.ctx, "5432")
 	suite.Require().NoError(err)
 	//suite.DBEndPoint = fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb", suite.pgHost, "5432")
@@ -85,12 +89,13 @@ func (suite *TstSeed) SetupSuite() {
 	db.Close()
 
 	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", suite.pgHost, suite.pgPort.Int())
-	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, suite.pgPort.Int())
+	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, 5432)
+	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, suite.pgPort.Int())
 	db, err = sql.Open("postgres", spr)
 	suite.Require().NoError(err)
 	db.Close()
 
-	models.DBEndPoint = spr
+	//models.DBEndPoint = spr
 	models.Logger.Info("PostGres GenericContainer Spent ", "", time.Since(suite.t))
 
 	// ***************** POSTGREs part end ************************************
@@ -101,25 +106,28 @@ func (suite *TstSeed) SetupSuite() {
 
 	//time.Sleep(10 * time.Second)
 
-	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Image: "iman:1",
-			//Image:        "naeel/iman:latest",
-			ExposedPorts: []string{"8080/tcp"},
-			Env: map[string]string{
-				//"DATABASE_DSN": models.DBEndPoint,
-				// Use "postgres" (container name) instead of "localhost"
-				"DATABASE_DSN": "host=" + hostName + " port=" + suite.pgPort.Port() + " user=testuser password=testpass dbname=testdb sslmode=disable",
-			},
-			WaitingFor: wait.ForAll(
-				wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
-				wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
-				wait.ForLog("HTTP server started"),
-			).WithDeadline(90 * time.Second), //
-			Networks: []string{suite.testNet.Name},
+	requ := testcontainers.ContainerRequest{
+		Image: "iman:1",
+		//Image:        "naeel/iman:latest",
+		ExposedPorts: []string{"8080/tcp"},
+		Env: map[string]string{
+			//"DATABASE_DSN": models.DBEndPoint,
+			// Use "postgres" (container name) instead of "localhost"
+			"DATABASE_DSN": "host=" + hostName + " port=" + "5432" + " user=testuser password=testpass dbname=testdb sslmode=disable",
+			//"DATABASE_DSN": "host=" + hostName + " port=" + suite.pgPort.Port() + " user=testuser password=testpass dbname=testdb sslmode=disable",
 		},
-		Started: true,
-		Reuse:   false,
+		WaitingFor: wait.ForAll(
+			wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
+		//	wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
+			wait.ForLog("HTTP server started"),
+		).WithDeadline(90 * time.Second), //
+		Networks: []string{suite.testNet.Name},
+	}
+
+	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: requ,
+		Started:          true,
+		Reuse:            false,
 	})
 	suite.Assert().NoError(err)
 
