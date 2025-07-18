@@ -32,9 +32,7 @@ func (suite *TstSeed) SetupSuite() {
 			"test": "handlers-suite",
 		}),
 	)
-	if err != nil {
-		suite.FailNowf("Failed to create network: %v", err.Error())
-	}
+	suite.Require().NoError(err)
 
 	// ***************** POSTGREs part begin ************************************
 	// Запуск контейнера PostgreSQL
@@ -50,6 +48,9 @@ func (suite *TstSeed) SetupSuite() {
 			WithStartupTimeout(2 * time.Minute).
 			WithPollInterval(1 * time.Second),
 		Networks: []string{suite.testNet.Name},
+		NetworkAliases: map[string][]string{
+			suite.testNet.Name: {"go-db"}, // <-- Explicit alias
+		},
 	}
 
 	postgresContainer, err := testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
@@ -100,28 +101,19 @@ func (suite *TstSeed) SetupSuite() {
 
 	suite.servakContainer, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
-			// FromDockerfile: testcontainers.FromDockerfile{
-			// 	Context:    "../../../",
-			// 	Dockerfile: "ServerDockerFile",
-			// },
 			Image: "iman:1",
 			//Image:        "naeel/iman:latest",
 			ExposedPorts: []string{"8080/tcp"},
 			Env: map[string]string{
-				//"DB_HOST":      suite.pgHost,
-				//"DB_PORT":      suite.pgPort.Port(),
-				// "DB_HOST":      pgIP,
-				// "DB_PORT":      "5432",
-				// "DB_USER":      "testusera",
-				// "DB_PASSWORD":  "testpassa",
-				// "DB_NAME":      "testdba",
-				"DATABASE_DSN": models.DBEndPoint,
+				//"DATABASE_DSN": models.DBEndPoint,
+				// Use "postgres" (container name) instead of "localhost"
+				"DATABASE_DSN": "host=go_db port=5432 user=testuser password=testpass dbname=testdb sslmode=disable",
 			},
 			WaitingFor: wait.ForAll(
 				wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
 				wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
 				wait.ForLog("HTTP server started"),
-			).WithDeadline(60 * time.Second), //
+			).WithDeadline(90 * time.Second), //
 			Networks: []string{suite.testNet.Name},
 		},
 		Started: true,
