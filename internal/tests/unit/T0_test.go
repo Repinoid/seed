@@ -138,21 +138,11 @@ func (suite *TstSeed) SetupSuite() {
 				"DATABASE_DSN": models.DBEndPoint,
 			},
 			WaitingFor: wait.ForAll(
-				wait.ForListeningPort("8080/tcp").WithStartupTimeout(30*time.Second),
-				wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(30*time.Second),
+				wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
+				wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
 				wait.ForLog("HTTP server started"),
-			).WithDeadline(10 * time.Second), //
+			).WithDeadline(60 * time.Second), //
 			Networks: []string{suite.testNet.Name},
-			// HostConfigModifier: func(hostConfig *container.HostConfig) {
-			// 	hostConfig.PortBindings = nat.PortMap{
-			// 		"8080/tcp": []nat.PortBinding{
-			// 			{
-			// 				HostIP:   "0.0.0.0",
-			// 				HostPort: "8080",
-			// 			},
-			// 		},
-			// 	}
-			// },
 		},
 		Started: true,
 		Reuse:   false,
