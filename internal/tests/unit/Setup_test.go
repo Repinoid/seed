@@ -107,8 +107,8 @@ func (suite *TstSeed) SetupSuite() {
 	//time.Sleep(10 * time.Second)
 
 	requ := testcontainers.ContainerRequest{
-		Image: "iman:1",
-		//Image:        "naeel/iman:latest",
+		//Image: "iman:1",
+		Image:        "naeel/iman:latest",
 		ExposedPorts: []string{"8080/tcp"},
 		Env: map[string]string{
 			//"DATABASE_DSN": models.DBEndPoint,
@@ -118,7 +118,7 @@ func (suite *TstSeed) SetupSuite() {
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
-		//	wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
+			//	wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
 			wait.ForLog("HTTP server started"),
 		).WithDeadline(90 * time.Second), //
 		Networks: []string{suite.testNet.Name},
