@@ -46,6 +46,21 @@ func (suite *TstSeed) SetupSuite() {
 
 	var err error
 
+// Создаем общую сеть для контейнеров
+    networkName := "test-network"
+    network, err := testcontainers.GenericNetwork(ctx, testcontainers.GenericNetworkRequest{
+        NetworkRequest: testcontainers.NetworkRequest{
+            Name:           networkName,
+            Attachable:    true,
+        },
+    })
+    if err != nil {
+        t.Fatal(err)
+    }
+    defer network.Remove(ctx)
+
+
+
 	//  1. Create network (simplified modern API)
 	suite.testNet, err = network.New(suite.ctx,
 		network.WithAttachable(),
@@ -60,7 +75,8 @@ func (suite *TstSeed) SetupSuite() {
 	// ***************** POSTGREs part begin ************************************
 	// Запуск контейнера PostgreSQL
 	req := testcontainers.ContainerRequest{
-		Image:        "postgres:17",
+		//Image: "postgres:15-alpine",
+		Image:        "postgres:latest",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"POSTGRES_PASSWORD": "testpass",
@@ -103,19 +119,7 @@ func (suite *TstSeed) SetupSuite() {
 	db.Close()
 
 	models.DBEndPoint = spr
-	models.Logger.Info("PostGres GenericContainer Spent ", "", time.Since(suite.t))
-
-	// err = wait.ForSQL("5432/tcp", "postgres", func(host string, port nat.Port) string {
-	// 	return fmt.Sprintf("host=%s port=%d user=user password=password dbname=testdb sslmode=disable", host, port.Int())
-	// }).
-	// 	WithStartupTimeout(30*time.Second).
-	// 	WithPollInterval(1*time.Second). // Добавляем интервал опроса
-	// 	WaitUntilReady(suite.ctx, postgresContainer)
-	//	err = wait.ForSQL("5432/tcp", "postgres", func(host string, port nat.Port) string {
-	// err = wait.ForSQL(suite.pgPort, "postgres", func(host string, port nat.Port) string {
-	// 	return spr
-	// }).WithStartupTimeout(30*time.Second).WaitUntilReady(suite.ctx, postgresContainer)
-	// suite.Require().NoError(err)
+	models.Logger.Debug("Endpoint ", "is ", spr)
 
 	// ***************** POSTGREs part end ************************************
 
@@ -129,13 +133,14 @@ func (suite *TstSeed) SetupSuite() {
 			//Image:        "naeel/iman:latest",
 			ExposedPorts: []string{"8080/tcp"},
 			Env: map[string]string{
-				"DB_HOST":      suite.pgHost,
-				"DB_PORT":      suite.pgPort.Port(),
-				"DB_USER":      "uname",
-				"DB_PASSWORD":  "password",
-				"DB_NAME":      "dbase",
+				// "DB_HOST":      suite.pgHost,
+				// "DB_PORT":      suite.pgPort.Port(),
+				// "DB_USER":      "uname",
+				// "DB_PASSWORD":  "password",
+				// "DB_NAME":      "dbase",
 				"DATABASE_DSN": models.DBEndPoint,
 			},
+			Networks: []string{suite.testNet.Name},
 			WaitingFor: wait.ForAll(
 				wait.ForListeningPort("8080/tcp"),
 				wait.ForHTTP("/health").WithPort("8080/tcp"),
