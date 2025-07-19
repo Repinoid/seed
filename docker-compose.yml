@@ -63,7 +63,8 @@ services:
     networks:
       - localnet
     depends_on:
-      - go_db
+      go_db:
+        condition: service_healthy  
 
 
 
