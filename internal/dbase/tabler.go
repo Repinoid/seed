@@ -89,3 +89,8 @@ func (dataBase *DBstruct) PutUser(ctx context.Context, uname, meta string) (err 
 	return
 
 }
+
+func (dataBase *DBstruct) Pinger(ctx context.Context) (err error) {
+	err = dataBase.DB.Ping(ctx)
+	return
+}

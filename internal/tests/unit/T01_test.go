@@ -2,17 +2,11 @@ package tests
 
 import (
 	"context"
-	"encoding/json"
 	"gomuncool/internal/dbase"
 	"gomuncool/internal/models"
 	"io"
 	"net/http"
 )
-
-type Ustr struct {
-	User string `json:"user"`
-	Role string `json:"role"`
-}
 
 func (suite *TstSeed) Test00InitDB() {
 	tests := []struct {
@@ -114,10 +108,6 @@ func (suite *TstSeed) Test03GetFromServer() {
 	body, err := io.ReadAll(resp.Body)
 	suite.Require().NoError(err)
 
-	str := Ustr{}
-	err = json.Unmarshal(body, &str)
-	suite.Require().NoError(err)
-
 	suite.Require().JSONEq(string(body), `{"user":"1", "role":"2a"}`)
 
 }
@@ -129,10 +119,6 @@ func (suite *TstSeed) Test04BADGetFromServer() {
 	suite.Assert().EqualValues(http.StatusNotFound, resp.StatusCode)
 
 	body, err := io.ReadAll(resp.Body)
-	suite.Require().NoError(err)
-
-	str := Ustr{}
-	err = json.Unmarshal(body, &str)
 	suite.Require().NoError(err)
 
 	suite.Require().JSONEq(string(body), `{"wrong user name":"2"}`)

@@ -84,3 +84,12 @@ func PutUser(rwr http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(rwr, `{"user added":"%s", "with role":"%s"}`, userName, role)
 
 }
+
+func Pinger(rwr http.ResponseWriter, req *http.Request) {
+	err := dbase.DataBase.Pinger(req.Context())
+	if err != nil {
+		rwr.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	rwr.WriteHeader(http.StatusOK)
+}
