@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"gomuncool/internal/models"
 	"io"
-	"os"
 	"time"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -25,7 +24,7 @@ func (suite *TstSeed) SetupSuite() {
 	suite.ctx = context.Background()
 	suite.t = time.Now()
 
-	os.Setenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+	//os.Setenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 
 	var err error
 
