@@ -21,7 +21,8 @@ var Host = "0.0.0.0:8080"
 //var models.Logger *slog.models.Logger
 
 func main() {
-	ctx := context.Background()
+	ctx := context.Background() 
+
 
 	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level:     slog.LevelDebug, // Минимальный уровень логирования
