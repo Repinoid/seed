@@ -53,13 +53,6 @@ jobs:
           sudo usermod -aG docker $USER
           newgrp docker
 
-
-
-
-
-
-
-
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -74,18 +67,20 @@ jobs:
       - name: Build with Docker Compose
         run: docker compose build
 
+        # testcontainer тесты, без запуска контейнеров
       - name: Run unit tests
         run: go test -v ./internal/tests/unit
 
+        # предзапуск контейнеров, тесты обращения к работающему серверу 
       - name: Start services and run tests
         run: |
           docker compose up -d
           sleep 10 # Wait for services to start
           
           # Run tests inside container
-          docker compose exec -T -e PORTOS="8080" go-server go test -v ./internal/tests/unit
+          docker compose exec -T -e PORTOS="8080" go-server go test -v ./internal/tests/integration
           
           # Run tests outside container
-          env PORTOS="8100" go test -v ./internal/tests/unit
+          env PORTOS="8100" go test -v ./internal/tests/integration
           
           docker compose down
