@@ -2,9 +2,17 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
 	"gomuncool/internal/dbase"
 	"gomuncool/internal/models"
+	"io"
+	"net/http"
 )
+
+type Ustr struct {
+	User string `json:"user"`
+	Role string `json:"role"`
+}
 
 func (suite *TstSeed) Test00InitDB() {
 	tests := []struct {
@@ -68,17 +76,65 @@ func (suite *TstSeed) Test02AddCheckUser() {
 
 }
 
-// func (suite *TstSeed) aTest01CheckServer() {
+func (suite *TstSeed) Test01CheckServer() {
 
-// 	resp, err := http.Get("http://" + suite.host + ":" + suite.port.Port() + "/")
-// 	suite.Require().NoError(err)
-// 	defer resp.Body.Close()
-// 	suite.Require().EqualValues(http.StatusOK, resp.StatusCode)
+	resp, err := http.Get("http://" + suite.servakHost + ":" + suite.servakPort.Port() + "/")
+	suite.Require().NoError(err)
+	defer resp.Body.Close()
+	suite.Require().EqualValues(http.StatusOK, resp.StatusCode)
 
-// 	body, err := io.ReadAll(resp.Body)
-// 	suite.Require().NoError(err)
-// 	_ = body
+	body, err := io.ReadAll(resp.Body)
+	suite.Require().NoError(err)
+	_ = body
 
-// 	//suite.Require().JSONEq (`{"status":"StatusOK"}`, string(body))
+	suite.Require().Contains(string(body), "IP")
 
-// }
+}
+func (suite *TstSeed) Test02PutToServer() {
+
+	resp, err := http.Get("http://" + suite.servakHost + ":" + suite.servakPort.Port() + "/put/1/2a")
+	suite.Require().NoError(err)
+	defer resp.Body.Close()
+	suite.Require().EqualValues(http.StatusOK, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	suite.Require().NoError(err)
+	//_ = body
+	suite.Require().Contains(string(body), "user added")
+	suite.Require().JSONEq(string(body), `{"user added":"1", "with role":"2a"}`)
+
+}
+func (suite *TstSeed) Test03GetFromServer() {
+
+	resp, err := http.Get("http://" + suite.servakHost + ":" + suite.servakPort.Port() + "/get/1")
+	suite.Require().NoError(err)
+	defer resp.Body.Close()
+	suite.Require().EqualValues(http.StatusOK, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	suite.Require().NoError(err)
+
+	str := Ustr{}
+	err = json.Unmarshal(body, &str)
+	suite.Require().NoError(err)
+
+	suite.Require().JSONEq(string(body), `{"user":"1", "role":"2a"}`)
+
+}
+func (suite *TstSeed) Test04BADGetFromServer() {
+
+	resp, err := http.Get("http://" + suite.servakHost + ":" + suite.servakPort.Port() + "/get/2")
+	suite.Require().NoError(err)
+	defer resp.Body.Close()
+	suite.Assert().EqualValues(http.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	suite.Require().NoError(err)
+
+	str := Ustr{}
+	err = json.Unmarshal(body, &str)
+	suite.Require().NoError(err)
+
+	suite.Require().JSONEq(string(body), `{"wrong user name":"2"}`)
+
+}

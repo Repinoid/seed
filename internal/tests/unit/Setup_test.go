@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"gomuncool/internal/models"
 	"io"
@@ -62,9 +61,8 @@ func (suite *TstSeed) SetupSuite() {
 	})
 	suite.Require().NoError(err)
 
-	pgIP, err := postgresContainer.ContainerIP(suite.ctx)
-	_ = pgIP
-	suite.Require().NoError(err)
+	// прописываем postgresContainer в переменные TstSeed struct чтобы по итогу suite.postgresContainer.Terminate(suite.ctx)
+	suite.postgresContainer = postgresContainer
 
 	// Получение хоста и порта postgres
 	suite.pgHost, err = postgresContainer.Host(suite.ctx)
@@ -74,27 +72,18 @@ func (suite *TstSeed) SetupSuite() {
 	// You may need to ensure that the startup order of components in your tests caters for this.
 	suite.pgPort, err = postgresContainer.MappedPort(suite.ctx, "5432")
 	suite.Require().NoError(err)
-	//suite.DBEndPoint = fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb", suite.pgHost, "5432")
+
+	// suite.DBEndPoint используется тестами.
+	// его хост/порт определяется через postgresContainer.Host и postgresContainer.MappedPort(suite.ctx, "5432")
 	suite.DBEndPoint = fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb", suite.pgHost, suite.pgPort.Port())
-	models.DBEndPoint = suite.DBEndPoint
-	suite.postgresContainer = postgresContainer
+
 	models.Logger.Info("PostgreSQL доступен по адресу: ",
 		"Host", suite.pgHost,
 		"Port", suite.pgPort.Port())
 
-	// Дополнительная проверка
-	db, err := sql.Open("postgres", models.DBEndPoint)
-	suite.Require().NoError(err)
-	db.Close()
+	// в этом эндпоинте хост - имя контейнера постгреса, порт 5432. Используется для контейнера приложения, по нему он в базу стучится
+	models.DBEndPoint = "host=" + hostName + " port=" + "5432" + " user=testuser password=testpass dbname=testdb sslmode=disable"
 
-	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, 5432)
-	spr :=  "host=" + hostName + " port=" + "5432" + " user=testuser password=testpass dbname=testdb sslmode=disable"
-	db, err = sql.Open("postgres", spr)
-	suite.Require().NoError(err)
-	db.Close()
-
-	models.DBEndPoint = spr
-	
 	models.Logger.Info("PostGres GenericContainer Spent ", "", time.Since(suite.t))
 
 	// ***************** POSTGREs part end ************************************
@@ -103,16 +92,12 @@ func (suite *TstSeed) SetupSuite() {
 
 	// ***************** IMANs part begin ************************************
 
-	//time.Sleep(10 * time.Second)
-
 	requ := testcontainers.ContainerRequest{
 		//Image: "iman:1",
 		Image:        "naeel/iman:latest",
 		ExposedPorts: []string{"8080/tcp"},
 		Env: map[string]string{
 			"DATABASE_DSN": models.DBEndPoint,
-			// Use container name instead of "localhost"
-			//"DATABASE_DSN": "host=" + hostName + " port=" + "5432" + " user=testuser password=testpass dbname=testdb sslmode=disable",
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
@@ -130,11 +115,21 @@ func (suite *TstSeed) SetupSuite() {
 
 	models.Logger.Info("Iman's Spent ", "", time.Since(suite.t))
 
+	// Получение хоста и порта сервера
+	suite.servakHost, err = suite.servakContainer.Host(suite.ctx)
+	suite.Require().NoError(err)
+	// get externally mapped port for a container port
+	// Because the randomised port mapping happens during container startup, the container must be running at the time MappedPort is called.
+	// You may need to ensure that the startup order of components in your tests caters for this.
+	suite.servakPort, err = suite.servakContainer.MappedPort(suite.ctx, "8080")
+	suite.Require().NoError(err)
+
+	// вывод логов контейнера, отлаживал
 	logsBytes, err := suite.servakContainer.Logs(context.Background())
 	if err != nil {
 		suite.T().Fatal("Failed to get container logs:", err)
 	}
-	defer logsBytes.Close() // Important!
+	defer logsBytes.Close()
 
 	// Convert to string
 	logs, err := io.ReadAll(logsBytes)

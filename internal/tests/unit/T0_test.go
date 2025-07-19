@@ -26,6 +26,9 @@ type TstSeed struct {
 	pgHost string
 	pgPort nat.Port
 
+	servakHost string
+	servakPort nat.Port
+
 	DBEndPoint        string
 	postgresContainer testcontainers.Container
 }
