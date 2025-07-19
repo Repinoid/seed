@@ -16,6 +16,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+      #  клонированиe репозитория в рабочую директорию
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -23,9 +27,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-          #  клонированиe репозитория в рабочую директорию
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Install rootless Docker
+        run: |
+          curl -fsSL https://get.docker.com/rootless | sh
+          echo "$HOME/bin" >> $GITHUB_PATH
+
 
           # Команда actions/setup-go@v4 — это действие (action) для GitHub Actions, 
           # предназначенное для настройки среды Go в рабочих процессах CI/CD. 
