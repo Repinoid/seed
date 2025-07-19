@@ -18,8 +18,6 @@ import (
 
 var Host = "0.0.0.0:8080"
 
-//var models.Logger *slog.models.Logger
-
 func main() {
 	ctx := context.Background() 
 

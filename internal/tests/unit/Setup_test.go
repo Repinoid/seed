@@ -24,7 +24,7 @@ func (suite *TstSeed) SetupSuite() {
 	suite.ctx = context.Background()
 	suite.t = time.Now()
 
-	//os.Setenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+	//os.Setenv("DOCKER_HOST", "unix:///var/run/docker.sock") на эту херь ругается github actions
 
 	var err error
 
@@ -87,14 +87,14 @@ func (suite *TstSeed) SetupSuite() {
 	suite.Require().NoError(err)
 	db.Close()
 
-	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", suite.pgHost, suite.pgPort.Int())
-	spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, 5432)
-	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, suite.pgPort.Int())
+	//spr := fmt.Sprintf("host=%s port=%d user=testuser password=testpass dbname=testdb sslmode=disable", hostName, 5432)
+	spr :=  "host=" + hostName + " port=" + "5432" + " user=testuser password=testpass dbname=testdb sslmode=disable"
 	db, err = sql.Open("postgres", spr)
 	suite.Require().NoError(err)
 	db.Close()
 
-	//models.DBEndPoint = spr
+	models.DBEndPoint = spr
+	
 	models.Logger.Info("PostGres GenericContainer Spent ", "", time.Since(suite.t))
 
 	// ***************** POSTGREs part end ************************************
@@ -110,14 +110,12 @@ func (suite *TstSeed) SetupSuite() {
 		Image:        "naeel/iman:latest",
 		ExposedPorts: []string{"8080/tcp"},
 		Env: map[string]string{
-			//"DATABASE_DSN": models.DBEndPoint,
-			// Use "postgres" (container name) instead of "localhost"
-			"DATABASE_DSN": "host=" + hostName + " port=" + "5432" + " user=testuser password=testpass dbname=testdb sslmode=disable",
-			//"DATABASE_DSN": "host=" + hostName + " port=" + suite.pgPort.Port() + " user=testuser password=testpass dbname=testdb sslmode=disable",
+			"DATABASE_DSN": models.DBEndPoint,
+			// Use container name instead of "localhost"
+			//"DATABASE_DSN": "host=" + hostName + " port=" + "5432" + " user=testuser password=testpass dbname=testdb sslmode=disable",
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForListeningPort("8080/tcp").WithStartupTimeout(60*time.Second),
-			//	wait.ForHTTP("/health").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
 			wait.ForLog("HTTP server started"),
 		).WithDeadline(90 * time.Second), //
 		Networks: []string{suite.testNet.Name},
