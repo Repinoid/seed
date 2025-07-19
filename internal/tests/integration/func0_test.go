@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func aTestCap(t *testing.T) {
+func TestCap(t *testing.T) {
 
 	port, exists := os.LookupEnv("PORTOS")
 	if !exists {
