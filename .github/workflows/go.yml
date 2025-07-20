@@ -56,8 +56,12 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
 
-      - name: Build with Docker Compose
-        run: docker compose build
+      # - name: Build with Docker Compose
+      #   run: docker compose build
+      - name: Build and push images
+        run: |
+            docker compose build
+            docker compose push        
 
         # testcontainer тесты, без запуска контейнеров
       - name: Run unit tests

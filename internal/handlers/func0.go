@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -92,4 +93,14 @@ func Pinger(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	rwr.WriteHeader(http.StatusOK)
+}
+
+func GetAll(rwr http.ResponseWriter, req *http.Request) {
+	list, err := dbase.DataBase.All(req.Context())
+	if err != nil {
+		rwr.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	rwr.WriteHeader(http.StatusOK)
+	json.NewEncoder(rwr).Encode(list)
 }

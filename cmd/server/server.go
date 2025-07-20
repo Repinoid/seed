@@ -58,6 +58,7 @@ func Run(ctx context.Context) (err error) {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", handlers.Cap).Methods("GET")
+	router.HandleFunc("/all", handlers.GetAll).Methods("GET")
 	router.HandleFunc("/health", handlers.Pinger).Methods("GET")
 	router.HandleFunc("/put/{userName}/{role}", handlers.PutUser).Methods("GET")
 	router.HandleFunc("/get/{userName}", handlers.GetUser).Methods("GET")

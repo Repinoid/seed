@@ -94,3 +94,28 @@ func (dataBase *DBstruct) Pinger(ctx context.Context) (err error) {
 	err = dataBase.DB.Ping(ctx)
 	return
 }
+
+func (dataBase *DBstruct) All(ctx context.Context) (ret []models.UserStr, err error) {
+	err = dataBase.DB.Ping(ctx)
+
+	getOrder := "SELECT username, metadata, user_created_at from USERA ORDER BY user_created_at"
+
+	rows, err := dataBase.DB.Query(ctx, getOrder)
+	if err != nil {
+		return nil, fmt.Errorf("error Query  %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		user := models.UserStr{}
+		err = rows.Scan(&user.Username, &user.Meta, &user.Created_at)
+		if err != nil {
+			return nil, fmt.Errorf("error table Scan  %[1]w", err)
+		}
+		ret = append(ret, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("err := rows.Err()  %w", err)
+	}
+	return
+}
