@@ -64,7 +64,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+  
       # - name: Build with Docker Compose
       #   run: docker compose build
       - name: Build and push images
