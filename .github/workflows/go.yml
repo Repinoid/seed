@@ -74,7 +74,7 @@ jobs:
         run: |
           docker compose build
 
-          docker image
+          docker images
           echo "user" ${{ secrets.DOCKERHUB_USERNAME }}
           echo  "passw" ${{ secrets.DOCKERHUB_TOKEN }}
 
@@ -85,7 +85,8 @@ jobs:
           #docker tag go-server ${{ env.IMAGE_NAME }}:latest
 
           # Пушим в Docker Hub
-          docker push ${{ env.IMAGE_NAME }}:latest   
+          docker push naeel/iman:latest   
+          # docker push ${{ env.IMAGE_NAME }}:latest   
             
         
 
