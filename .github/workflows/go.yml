@@ -7,7 +7,7 @@ on:
 env:
   EXTERNAL_PORT: "8888"
   REGISTRY: ghcr.io
-  IMAGE_NAME: iman
+  IMAGE_NAME: repinoid/iman
 
 # Add this permissions block
 permissions:
@@ -80,7 +80,7 @@ jobs:
             # docker compose push        
 
               # Manually tag and push each service
-            docker tag go-server ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+            docker tag go-server ${{ env.REGISTRY }}/${{ lower(github.repository_owner) }}/${{ env.IMAGE_NAME }}:latest
             docker push ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
 
 
