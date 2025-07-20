@@ -85,7 +85,7 @@ jobs:
             # docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
             #   # Explicit lowercase tagging
-            docker tag iman ghcr.io/repinoid/iman:latest
+            # docker tag iman ghcr.io/repinoid/iman:latest
             docker push ghcr.io/repinoid/iman:latest
 
               # Manually tag and push each service
