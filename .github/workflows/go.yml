@@ -6,8 +6,7 @@ on:
 
 env:
   EXTERNAL_PORT: "8888"
-  REGISTRY: ""
-  #REGISTRY: ghcr.io
+  REGISTRY: ghcr.io
   IMAGE_NAME:  naeel/iman
 
 # Add this permissions block
