@@ -77,8 +77,8 @@ jobs:
       - name: Build and push images
         run: |
             docker compose build
-            # docker compose push        
-            docker compose build
+            docker compose push        
+            #docker compose build
 
             # IMAGE_NAME=$(docker compose config | yq '.services.go-server.image')
             # docker tag $IMAGE_NAME ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
@@ -86,7 +86,7 @@ jobs:
 
             #   # Explicit lowercase tagging
             # docker tag iman ghcr.io/repinoid/iman:latest
-            docker push ghcr.io/repinoid/iman:latest
+            #docker push ghcr.io/repinoid/iman:latest
 
               # Manually tag and push each service
             # LOWERCASE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
