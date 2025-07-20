@@ -63,7 +63,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          password: ${{ secrets.GHCR_TOKEN }}
   
       # - name: Build with Docker Compose
       #   run: docker compose build
