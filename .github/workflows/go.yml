@@ -6,7 +6,6 @@ on:
 
 env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}  # Логин Docker Hub
-  IMAGE_NAME: naeel/iman  # Например: `naeel/go-server`
 
   EXTERNAL_PORT: "8888"
   REGISTRY: ghcr.io
