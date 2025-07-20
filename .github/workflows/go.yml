@@ -7,7 +7,7 @@ on:
 env:
   EXTERNAL_PORT: "8888"
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository }}/iman
 
 # Add this permissions block
 permissions:
@@ -68,7 +68,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}  # Use the automatic GITHUB_TOKEN instead of GHCR_TOKEN
+          password: ${{ secrets.GITHUB_TOKEN1 }}  # Use the automatic GITHUB_TOKEN instead of GHCR_TOKEN
           # password: ${{ secrets.GHCR_TOKEN }}
   
       # - name: Build with Docker Compose
