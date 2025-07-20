@@ -75,6 +75,10 @@ jobs:
         run: |
           docker compose build
 
+          docker image
+          echo "user" ${{ env.DOCKERHUB_USERNAME }}
+          echo  "passw" ${{ secrets.DOCKERHUB_TOKEN }}
+
           # Получаем имя образа из docker-compose.yml (если нужно)
           IMAGE_NAME=$(docker compose config | yq '.services.go-server.image') 
           echo "Image" IMAGE_NAME
