@@ -83,8 +83,8 @@ jobs:
             
             # Tag and push with explicit GHCR format
             docker tag $IMAGE_NAME ghcr.io/naeel/iman:latest
-            echo $IMAGE_NAME
-            ls -l
+            echo "$IMAGE_NAME" $IMAGE_NAME
+            docker images
             docker push ghcr.io/naeel/iman:latest
             
             
