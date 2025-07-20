@@ -78,10 +78,15 @@ jobs:
         run: |
             docker compose build
             # docker compose push        
+            docker compose build
+              # Explicit lowercase tagging
+            docker tag go-server ghcr.io/repinoid/iman:latest
+            docker push ghcr.io/repinoid/iman:latest
 
               # Manually tag and push each service
-            docker tag go-server ${{ env.REGISTRY }}/${{ lower(github.repository_owner) }}/${{ env.IMAGE_NAME }}:latest
-            docker push ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+            # LOWERCASE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            # docker tag go-server ghcr.io/${LOWERCASE_OWNER}/iman:latest
+            # docker push ghcr.io/${LOWERCASE_OWNER}/iman:latest
 
 
         # testcontainer тесты, без запуска контейнеров
