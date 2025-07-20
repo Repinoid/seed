@@ -8,7 +8,7 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}  # Логин Docker Hub 
 
   EXTERNAL_PORT: "8888"
-  REGISTRY: ghcr.io
+  #REGISTRY: ghcr.io
   IMAGE_NAME:  naeel/iman
 
 # Add this permissions block
