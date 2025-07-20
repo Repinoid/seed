@@ -7,7 +7,7 @@ on:
 env:
   EXTERNAL_PORT: "8888"
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/iman
+  IMAGE_NAME: iman
 
 # Add this permissions block
 permissions:
@@ -67,7 +67,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.repository_owner }}
+          username: ${{ github.actor }}
+          # username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}  # Use the automatic GITHUB_TOKEN instead of GHCR_TOKEN
           # password: ${{ secrets.GHCR_TOKEN }}
   
@@ -76,7 +77,12 @@ jobs:
       - name: Build and push images
         run: |
             docker compose build
-            docker compose push        
+            # docker compose push        
+
+              # Manually tag and push each service
+            docker tag go-server ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+            docker push ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+
 
         # testcontainer тесты, без запуска контейнеров
       - name: Run unit tests
