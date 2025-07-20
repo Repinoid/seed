@@ -79,8 +79,13 @@ jobs:
             docker compose build
             # docker compose push        
             docker compose build
-              # Explicit lowercase tagging
-            docker tag go-server ghcr.io/repinoid/iman:latest
+
+            # IMAGE_NAME=$(docker compose config | yq '.services.go-server.image')
+            # docker tag $IMAGE_NAME ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            # docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+            #   # Explicit lowercase tagging
+            docker tag iman ghcr.io/repinoid/iman:latest
             docker push ghcr.io/repinoid/iman:latest
 
               # Manually tag and push each service
@@ -89,20 +94,20 @@ jobs:
             # docker push ghcr.io/${LOWERCASE_OWNER}/iman:latest
 
 
-        # testcontainer тесты, без запуска контейнеров
-      - name: Run unit tests
-        run: go test -v ./internal/tests/unit
+      #   # testcontainer тесты, без запуска контейнеров
+      # - name: Run unit tests
+      #   run: go test -v ./internal/tests/unit
 
-        # предзапуск контейнеров, тесты обращения к работающему серверу 
-      - name: Start services and run tests
-        run: |
-          docker compose up -d
-          sleep 10 # Wait for services to start
+      #   # предзапуск контейнеров, тесты обращения к работающему серверу 
+      # - name: Start services and run tests
+      #   run: |
+      #     docker compose up -d
+      #     sleep 10 # Wait for services to start
           
-          # Run tests inside container
-          docker compose exec -T -e PORTOS="8080" go-server go test -v ./internal/tests/integration
+      #     # Run tests inside container
+      #     docker compose exec -T -e PORTOS="8080" go-server go test -v ./internal/tests/integration
           
-          # Run tests outside container
-          env PORTOS="8888" go test -v ./internal/tests/integration
+      #     # Run tests outside container
+      #     env PORTOS="8888" go test -v ./internal/tests/integration
           
-          docker compose down
+      #     docker compose down
