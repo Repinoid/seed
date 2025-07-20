@@ -9,6 +9,11 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+# Add this permissions block
+permissions:
+  contents: read
+  packages: write  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -63,7 +68,8 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}  # Use the automatic GITHUB_TOKEN instead of GHCR_TOKEN
+          # password: ${{ secrets.GHCR_TOKEN }}
   
       # - name: Build with Docker Compose
       #   run: docker compose build
