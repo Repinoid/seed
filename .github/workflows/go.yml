@@ -5,10 +5,7 @@ on:
     branches: [ "based" ]
 
 env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}  # Логин Docker Hub 
-
   EXTERNAL_PORT: "8888"
-  #REGISTRY: ghcr.io
   IMAGE_NAME:  naeel/iman
 
 # Add this permissions block
@@ -78,7 +75,7 @@ jobs:
           docker compose build
 
           docker image
-          echo "user" ${{ env.DOCKERHUB_USERNAME }}
+          echo "user" ${{ secrets.DOCKERHUB_USERNAME }}
           echo  "passw" ${{ secrets.DOCKERHUB_TOKEN }}
 
           # Получаем имя образа из docker-compose.yml (если нужно)
