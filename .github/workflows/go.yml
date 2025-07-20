@@ -7,7 +7,7 @@ on:
 env:
   EXTERNAL_PORT: "8888"
   REGISTRY: ghcr.io
-  IMAGE_NAME: repinoid/iman
+  IMAGE_NAME:  naeel/iman
 
 # Add this permissions block
 permissions:
@@ -77,8 +77,17 @@ jobs:
       - name: Build and push images
         run: |
             docker compose build
-            docker compose push        
-            #docker compose build
+            
+            # Get the exact image name from compose
+            IMAGE_NAME=$(docker compose config | yq '.services.go-server.image')
+            
+            # Tag and push with explicit GHCR format
+            docker tag $IMAGE_NAME ghcr.io/naeel/iman:latest
+            docker push ghcr.io/naeel/iman:latest
+            
+            
+            #docker compose push        
+          
 
             # IMAGE_NAME=$(docker compose config | yq '.services.go-server.image')
             # docker tag $IMAGE_NAME ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
