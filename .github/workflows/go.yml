@@ -78,7 +78,7 @@ jobs:
           docker compose build
 
           # Получаем имя образа из docker-compose.yml (если нужно)
-          IMAGE_NAME=$(docker compose config | yq '.services.go-server.image')
+          IMAGE_NAME=$(docker compose config | yq '.services.go-server.image') 
           echo "Image" IMAGE_NAME
           # Тегируем для Docker Hub (если имя не задано в compose)
           docker tag go-server ${{ env.IMAGE_NAME }}:latest
