@@ -5,7 +5,7 @@ on:
     branches: [ "based" ]
 
 env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}  # Логин Docker Hub
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}  # Логин Docker Hub 
 
   EXTERNAL_PORT: "8888"
   REGISTRY: ghcr.io
