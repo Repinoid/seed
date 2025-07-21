@@ -10,7 +10,7 @@ env:
 
 # Add this permissions block
 permissions:
-  contents: read
+  contents: read  
   packages: write  
 
 jobs: 
